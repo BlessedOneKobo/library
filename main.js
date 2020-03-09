@@ -12,9 +12,8 @@ Book.prototype.info = function() {
   return infoStr + (this.read ? 'read' : 'not read yet');
 };
 
-addBookToLibrary('The Hobbit', 'J.R.R. Tolkien', 295);
-addBookToLibrary('1984', 'George Orwell', 400, true);
-addBookToLibrary('Z is for Zachariah', 'Robert O\'Brien', 300, true);
+// INIT
+getLibraryFromLocal();
 render();
 
 // ELEMENT SELECTORS
@@ -92,6 +91,31 @@ function handleFormSubmit(e) {
 }
 
 // HELPER FUNCTIONS
+function storageAvailable(type) {
+  var storage;
+  try {
+    storage = window[type];
+    var x = '__storage_test__';
+    storage.setItem(x, x);
+    storage.removeItem(x);
+    return true;
+  }
+  catch(e) {
+    return e instanceof DOMException && (
+      // everything except Firefox
+      e.code === 22 ||
+      // Firefox
+      e.code === 1014 ||
+      // test name field too, because code might not be present
+      // everything except Firefox
+      e.name === 'QuotaExceededError' ||
+      // Firefox
+      e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+      // acknowledge QuotaExceededError only if there's something already stored
+      (storage && storage.length !== 0);
+  }
+}
+
 function hideModal() {
   modalElement.style.display = 'none';
   document.body.focus();
@@ -146,9 +170,28 @@ function clearFields(...args) {
   });
 }
 
+function saveLibraryToLocal() {
+  if (storageAvailable('localStorage')) {
+    localStorage.setItem('library', JSON.stringify(myLibrary));
+  }
+}
+
+function getLibraryFromLocal() {
+  if (
+    storageAvailable('localStorage')
+    && localStorage.length !== 0
+    && localStorage.library
+  ) {
+    myLibrary = JSON.parse(localStorage.getItem('library'));
+  }
+}
+
 function addBookToLibrary(title, author, pages, read = false) {
   const book = new Book(title, author, pages, read);
   myLibrary.push(book);
+  if (storageAvailable('localStorage')) {
+    saveLibraryToLocal();
+  }
 }
 
 function render() {
@@ -163,15 +206,18 @@ function render() {
 
     const titleElement = document.createElement('p');
     titleElement.classList.add('book-title');
-    titleElement.innerHTML = '<span class="label">Title:</span> ' + book.title;
+    titleElement.innerHTML = '<span class="label">Title:</span> ';
+    titleElement.innerHTML += book.title;
 
     const authorElement = document.createElement('p');
     authorElement.classList.add('book-author');
-    authorElement.innerHTML = '<span class="label">Author:</span> ' + book.author;
+    authorElement.innerHTML = '<span class="label">Author:</span> ';
+    authorElement.innerHTML += book.author;
 
     const pagesElement = document.createElement('p');
     pagesElement.classList.add('book-pages');
-    pagesElement.innerHTML = '<span class="label">Pages:</span> ' + book.pages;
+    pagesElement.innerHTML = '<span class="label">Pages:</span> '
+    pagesElement.innerHTML += book.pages;
 
     const readElement = document.createElement('p');
     readElement.classList.add('book-read-status');
