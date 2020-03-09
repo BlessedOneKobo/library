@@ -19,7 +19,7 @@ render();
 // ELEMENT SELECTORS
 const containerElement = document.querySelector('.container');
 const modalElement = document.querySelector('.modal');
-const addBtn = document.querySelector('[data-type="add"]');
+const modalBtn = document.querySelector('[data-type="show-modal"]');
 const cancelBtn = document.querySelector('[data-type="cancel"]');
 const formElement = document.querySelector('form');
 const titleField = document.querySelector('input[name="title"]');
@@ -28,7 +28,7 @@ const pagesField = document.querySelector('input[name="pages"]');
 const readOptions = document.querySelectorAll('input[name="read"]');
 
 // EVENT LISTENERS
-addBtn.addEventListener('click', handleAddClick);
+modalBtn.addEventListener('click', handleModalShow);
 cancelBtn.addEventListener('click', handleCancelClick);
 formElement.addEventListener('submit', handleFormSubmit);
 document.body.addEventListener('click', handleModalHide);
@@ -61,8 +61,9 @@ function handleToggle(e) {
   render();
 }
 
-function handleAddClick() {
+function handleModalShow() {
   modalElement.style.display = 'block'
+  clearFields(titleField, authorField, pagesField);
   titleField.focus();
 }
 
