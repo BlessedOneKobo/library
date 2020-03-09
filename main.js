@@ -58,6 +58,7 @@ function handleToggle(e) {
     book.classList.add('unread');
     book.classList.remove('read');
   }
+
   render();
 }
 
@@ -136,6 +137,7 @@ function changeReadStatus(id) {
   for (let i = 0, len = myLibrary.length; i < len; i++) {
     if (i === id) {
       myLibrary[i].read = !myLibrary[i].read;
+      saveLibraryToLocal();
       return myLibrary[i].read;
     }
   }
