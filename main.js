@@ -12,64 +12,6 @@ Book.prototype.info = function() {
   return infoStr + (this.read ? 'read' : 'not read yet');
 };
 
-function addBookToLibrary(title, author, pages, read = false) {
-  const book = new Book(title, author, pages, read);
-  myLibrary.push(book);
-}
-
-function render() {
-  const containerElement = document.querySelector('.flex-container');
-
-  [...containerElement.children].forEach((book) => {
-    containerElement.removeChild(book);
-  });
-
-  myLibrary.forEach((book, index) => {
-    const titleElement = document.createElement('p');
-    titleElement.classList.add('book-title');
-    titleElement.innerHTML = '<span class="label">Title:</span> ' + book.title;
-
-    const authorElement = document.createElement('p');
-    authorElement.classList.add('book-author');
-    authorElement.innerHTML = '<span class="label">Author:</span> ' + book.author;
-
-    const pagesElement = document.createElement('p');
-    pagesElement.classList.add('book-pages');
-    pagesElement.innerHTML = '<span class="label">Pages:</span> ' + book.pages;
-
-    const readElement = document.createElement('p');
-    readElement.classList.add('book-read-status');
-    readElement.innerHTML = '<span class="label">Read Status:</span> ' + (book.read ? 'yes' : 'not yet');
-
-    const toggleReadBtn = document.createElement('button');
-    toggleReadBtn.addEventListener('click', handleToggle);
-    toggleReadBtn.classList.add('toggle');
-    toggleReadBtn.textContent = 'Change read status'
-
-    const removeBtn = document.createElement('button');
-    removeBtn.addEventListener('click', handleRemove);
-    removeBtn.classList.add('remove');
-    removeBtn.textContent = 'Remove';
-
-    const btnGroup = document.createElement('div');
-    btnGroup.classList.add('justify-space-between');
-    btnGroup.classList.add('flex-container');
-    btnGroup.appendChild(toggleReadBtn);
-    btnGroup.appendChild(removeBtn);
-
-
-    const bookElement = document.createElement('div');
-    bookElement.classList.add('book');
-    bookElement.appendChild(titleElement);
-    bookElement.appendChild(authorElement);
-    bookElement.appendChild(pagesElement);
-    bookElement.appendChild(readElement);
-    bookElement.appendChild(btnGroup);
-    bookElement.dataset.id = index;
-    containerElement.appendChild(bookElement);
-  });
-}
-
 addBookToLibrary('The Hobbit', 'J.R.R. Tolkien', 295);
 addBookToLibrary('1984', 'George Orwell', 400, true);
 addBookToLibrary('Z is for Zachariah', 'Robert O\'Brien', 300, true);
@@ -109,7 +51,14 @@ function handleRemove(e) {
 function handleToggle(e) {
   const book = e.target.parentElement.parentElement;
   const bookId = Number(book.dataset.id);
-  changeReadStatus(bookId);
+  const newStatus = changeReadStatus(bookId);
+  if (newStatus) {
+    book.classList.add('read');
+    book.classList.remove('unread');
+  } else {
+    book.classList.add('unread');
+    book.classList.remove('read');
+  }
   render();
 }
 
@@ -162,6 +111,7 @@ function changeReadStatus(id) {
   for (let i = 0, len = myLibrary.length; i < len; i++) {
     if (i === id) {
       myLibrary[i].read = !myLibrary[i].read;
+      return myLibrary[i].read;
     }
   }
 }
@@ -193,5 +143,70 @@ function clearFields(...args) {
   args.forEach((field) => {
     field.value = '';
     field.nextElementSibling.style.opacity = '0';
+  });
+}
+
+function addBookToLibrary(title, author, pages, read = false) {
+  const book = new Book(title, author, pages, read);
+  myLibrary.push(book);
+}
+
+function render() {
+  const containerElement = document.querySelector('.flex-container');
+
+  [...containerElement.children].forEach((book) => {
+    containerElement.removeChild(book);
+  });
+
+  myLibrary.forEach((book, index) => {
+    const bookElement = document.createElement('div');
+
+    const titleElement = document.createElement('p');
+    titleElement.classList.add('book-title');
+    titleElement.innerHTML = '<span class="label">Title:</span> ' + book.title;
+
+    const authorElement = document.createElement('p');
+    authorElement.classList.add('book-author');
+    authorElement.innerHTML = '<span class="label">Author:</span> ' + book.author;
+
+    const pagesElement = document.createElement('p');
+    pagesElement.classList.add('book-pages');
+    pagesElement.innerHTML = '<span class="label">Pages:</span> ' + book.pages;
+
+    const readElement = document.createElement('p');
+    readElement.classList.add('book-read-status');
+    readElement.innerHTML = '<span class="label">Read Status:</span> ';
+    if (book.read) {
+      readElement.innerHTML += 'yes';
+      bookElement.classList.add('read');
+    } else {
+      readElement.innerHTML += 'not yet';
+      bookElement.classList.add('unread');
+    }
+
+    const toggleReadBtn = document.createElement('button');
+    toggleReadBtn.addEventListener('click', handleToggle);
+    toggleReadBtn.classList.add('toggle');
+    toggleReadBtn.textContent = 'Change read status'
+
+    const removeBtn = document.createElement('button');
+    removeBtn.addEventListener('click', handleRemove);
+    removeBtn.classList.add('remove');
+    removeBtn.textContent = 'Remove';
+
+    const btnGroup = document.createElement('div');
+    btnGroup.classList.add('justify-space-between');
+    btnGroup.classList.add('flex-container');
+    btnGroup.appendChild(toggleReadBtn);
+    btnGroup.appendChild(removeBtn);
+
+    bookElement.classList.add('book');
+    bookElement.appendChild(titleElement);
+    bookElement.appendChild(authorElement);
+    bookElement.appendChild(pagesElement);
+    bookElement.appendChild(readElement);
+    bookElement.appendChild(btnGroup);
+    bookElement.dataset.id = index;
+    containerElement.appendChild(bookElement);
   });
 }
