@@ -73,12 +73,6 @@ function render() {
 addBookToLibrary('The Hobbit', 'J.R.R. Tolkien', 295);
 addBookToLibrary('1984', 'George Orwell', 400, true);
 addBookToLibrary('Z is for Zachariah', 'Robert O\'Brien', 300, true);
-addBookToLibrary('The Hobbit', 'J.R.R. Tolkien', 295);
-addBookToLibrary('1984', 'George Orwell', 400, true);
-addBookToLibrary('Z is for Zachariah', 'Robert O\'Brien', 300, true);
-addBookToLibrary('The Hobbit', 'J.R.R. Tolkien', 295);
-addBookToLibrary('1984', 'George Orwell', 400, true);
-addBookToLibrary('Z is for Zachariah', 'Robert O\'Brien', 300, true);
 render();
 
 // ELEMENT SELECTORS
