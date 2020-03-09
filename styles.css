@@ -1,0 +1,220 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol, ul {
+  list-style: none;
+}
+blockquote, q {
+  quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* General */
+
+*, *:before, *:after {
+  box-sizing: border-box;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.8em;
+  font-weight: bold;
+  margin-bottom: .5em;
+  letter-spacing: .08em;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+p {
+  line-height: 1.8;
+  letter-spacing: .02em;
+}
+
+button, label {
+  cursor: pointer;
+}
+
+button {
+  padding: 1em;
+  border: 0;
+  font-size: .85em;
+  color: #fff;
+  background-color: #005782;
+  box-shadow: 0 2px 2px 1px #444;
+}
+
+button:hover {
+  background-color: #023a5c;
+  box-shadow: 0 2px 2px 1px #000
+}
+
+button:active {
+  box-shadow: 1px 1px 4px 0 inset #000, -1px -1px 4px 0 inset #000
+}
+
+button.remove {
+  background-color: #cc0000;
+}
+
+button.remove:hover {
+  background-color: #960000;
+}
+
+.flex-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+
+.justify-space-around {
+  justify-content: space-around;
+}
+
+.justify-space-between {
+  justify-content: space-between;
+}
+
+/* Container */
+.container {
+  margin: 2em auto;
+  width: 95%;s
+}
+
+/* "Add Book" buttons */
+.add-book {
+  background-color: #008239;
+}
+.add-book:hover {
+  background-color: #02662e;
+}
+
+/* First/Top Level "Add book" button */
+[data-type="add"] {
+  display: block;
+  width: 8em;
+  margin: 0 auto;
+}
+
+/* Books */
+.books {
+  margin-top: 1em;
+}
+
+.book {
+  background-color: #ededed;
+  flex: 0 0 25em;
+  margin-top: .5%;
+  margin-bottom: 3%;
+  padding: 1em;
+  box-shadow: 2px 2px 2px 1px #555, 0 0 2px 0px #000;
+}
+
+.label {
+  font-weight: bold;
+  width: 7em;
+  display: inline-block;
+}
+
+/* Modal */
+
+.modal {
+  font-family: sans-serif;
+  color: #fff;
+  background-color: rgba(0, 0, 0, .25);
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  text-align: center;
+  display: none;
+}
+
+form {
+  width: 80%;
+  margin: 4em auto;
+  padding: 2em 1em;
+  background-color: #ddd;
+}
+
+.form-group {
+  margin-bottom: 1em;
+  color: #000;
+}
+
+.modal input, .modal button, .radio label {
+  font-size: 1.8em;
+  text-align: center;
+}
+
+input[type='text'], input[type='number'] {
+  width: 18em;
+  padding: .25em .25em;
+}
+
+.error {
+  color: red;
+  display: block;
+  opacity: 0;
+}
+
+@media (max-width: 400px) {
+  .book {
+    flex: 0 0 18em;
+    margin-bottom: 6%;
+  }
+}
+
+/*@media (max-width: 768px) {
+  .book {
+    flex: 0 0 40em;
+    margin-bottom: 3%;
+  }
+}
+*/
+/*@media (max-width: 420px) {
+  .book {
+    flex: 0 0 25em;
+    margin-bottom: 6%;
+  }
+}*/
