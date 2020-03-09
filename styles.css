@@ -179,8 +179,6 @@ button.remove:hover {
 }
 
 form {
-  width: 80%;
-  margin: 4em auto;
   padding: 2em 1em;
   background-color: #ddd;
 }
@@ -195,8 +193,13 @@ form {
   text-align: center;
 }
 
+.modal button {
+  width: 8em;
+  font-size: 1.25em;
+}
+
 input[type='text'], input[type='number'] {
-  width: 18em;
+  width: 95%;
   padding: .25em .25em;
 }
 
@@ -210,5 +213,11 @@ input[type='text'], input[type='number'] {
   .book {
     flex: 0 0 18em;
     margin-bottom: 6%;
+  }
+}
+
+@media (max-width: 350px) {
+  .modal button:last-child {
+    margin-top: 1em;
   }
 }
