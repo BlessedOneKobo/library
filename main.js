@@ -75,7 +75,7 @@ function handleCancelClick(e) {
 
 function handleFormSubmit(e) {
   e.preventDefault();
-  const read = ([...readOptions].reduce(optionReducer)) === true;
+  const readStatus = ([...readOptions].reduce(optionReducer)) === true;
   const error = checkForError(titleField, authorField, pagesField);
   if (!error) {
     addBookToLibrary
@@ -83,7 +83,7 @@ function handleFormSubmit(e) {
       titleField.value,
       authorField.value,
       Number(pagesField.value),
-      read
+      readStatus
     );
     clearFields(titleField, authorField, pagesField);
     modalElement.style.display = 'none';
@@ -125,22 +125,14 @@ function hideModal() {
 }
 
 function removeBook(id) {
-  for (let i = 0, len = myLibrary.length; i < len; i++) {
-    if (i === id) {
-      myLibrary.splice(i, 1);
-      break;
-    }
-  }
+  myLibrary.splice(id, 1);
+  saveLibraryToLocal();
 }
 
 function changeReadStatus(id) {
-  for (let i = 0, len = myLibrary.length; i < len; i++) {
-    if (i === id) {
-      myLibrary[i].read = !myLibrary[i].read;
-      saveLibraryToLocal();
-      return myLibrary[i].read;
-    }
-  }
+  myLibrary[id].read = !myLibrary[id].read;
+  saveLibraryToLocal();
+  return myLibrary[id].read;
 }
 
 function optionReducer(a, b) {
