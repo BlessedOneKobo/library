@@ -1,253 +1,287 @@
-let myLibrary = [];
+class Book {
+  constructor(title, author, pages, read = false) {
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.read = read;
+  }
 
-function Book(title, author, pages, read = false) {
-  this.title = title;
-  this.author = author;
-  this.pages = pages;
-  this.read = read;
-}
-
-Book.prototype.info = function() {
-  const infoStr = this.title + ' by ' + this.author + ', ' + this.pages + ', ';
-  return infoStr + (this.read ? 'read' : 'not read yet');
-};
-
-// INIT
-getLibraryFromLocal();
-render();
-
-// ELEMENT SELECTORS
-const containerElement = document.querySelector('.container');
-const modalElement = document.querySelector('.modal');
-const modalBtn = document.querySelector('[data-type="show-modal"]');
-const cancelBtn = document.querySelector('[data-type="cancel"]');
-const formElement = document.querySelector('form');
-const titleField = document.querySelector('input[name="title"]');
-const authorField = document.querySelector('input[name="author"]');
-const pagesField = document.querySelector('input[name="pages"]');
-const readOptions = document.querySelectorAll('input[name="read"]');
-
-// EVENT LISTENERS
-modalBtn.addEventListener('click', handleModalShow);
-cancelBtn.addEventListener('click', handleCancelClick);
-formElement.addEventListener('submit', handleFormSubmit);
-document.body.addEventListener('click', handleModalHide);
-
-// EVENT HANDLERS
-function handleModalHide (e) {
-  if ([...e.target.classList].includes('modal')) {
-    hideModal();
+  info() {
+    const infoStr = `${this.title} by ${this.author}, ${this.pages},`;
+    return `${infoStr} ${(this.read ? 'read' : 'not read yet')}`;
   }
 }
 
-function handleRemove(e) {
-  const book = e.target.parentElement.parentElement;
-  const bookId = Number(book.dataset.id);
-  removeBook(bookId);
-  render();
-}
 
-function handleToggle(e) {
-  const book = e.target.parentElement.parentElement;
-  const bookId = Number(book.dataset.id);
-  const newStatus = changeReadStatus(bookId);
-  if (newStatus) {
-    book.classList.add('read');
-    book.classList.remove('unread');
-  } else {
-    book.classList.add('unread');
-    book.classList.remove('read');
+class Library {
+  constructor() {
+    this.bookList = [];
+    if (Library.storageAvailable('localStorage')) {
+      this.bookList = Library.getFromLocal() || this.bookList;
+    }
   }
 
-  render();
+  addBook(title, author, pages, read = false) {
+    const book = new Book(title, author, pages, read);
+    this.bookList.push(book);
+    if (Library.storageAvailable('localStorage')) {
+      Library.saveToLocal(this.bookList);
+    }
+  }
+
+  removeBook(id) {
+    this.bookList.splice(id, 1);
+    Library.saveToLocal();
+  }
+
+  changeReadStatus(id) {
+    this.bookList[id].read = !this.bookList[id].read;
+    Library.saveToLocal(this.bookList);
+    return this.bookList[id].read;
+  }
+
+  static storageAvailable(type) {
+    var storage;
+    try {
+      storage = window[type];
+      var x = '__storage_test__';
+      storage.setItem(x, x);
+      storage.removeItem(x);
+      return true;
+    }
+    catch(e) {
+      return e instanceof DOMException && (
+        // everything except Firefox
+        e.code === 22 ||
+        // Firefox
+        e.code === 1014 ||
+        // test name field too, because code might not be present
+        // everything except Firefox
+        e.name === 'QuotaExceededError' ||
+        // Firefox
+        e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
+        // acknowledge QuotaExceededError iff. there's something already stored
+        (storage && storage.length !== 0);
+    }
+  }
+
+  static saveToLocal(list) {
+    if (Library.storageAvailable('localStorage')) {
+      localStorage.setItem('bookList', JSON.stringify(list));
+    }
+  }
+
+  static getFromLocal() {
+    if (
+      Library.storageAvailable('localStorage')
+      && localStorage.length !== 0
+      && localStorage.bookList !== 'undefined'
+    ) {
+      return JSON.parse(localStorage.getItem('bookList'));
+    }
+  }
 }
 
-function handleModalShow() {
-  modalElement.style.display = 'block'
-  clearFields(titleField, authorField, pagesField);
-  titleField.focus();
-}
 
-function handleCancelClick(e) {
-  e.preventDefault();
-  hideModal();
-}
+const displayModule = (function() {
+  const containerElement = document.querySelector('.container');
+  const modalElement = document.querySelector('.modal');
+  const modalBtn = document.querySelector('[data-type="show-modal"]');
+  const cancelBtn = document.querySelector('[data-type="cancel"]');
+  const formElement = document.querySelector('form');
+  const titleField = document.querySelector('[name="title"]');
+  const authorField = document.querySelector('[name="author"]');
+  const pagesField = document.querySelector('[name="pages"]');
+  const readOptions = document.querySelectorAll('[name="read"]');
 
-function handleFormSubmit(e) {
-  e.preventDefault();
-  const readStatus = ([...readOptions].reduce(optionReducer)) === true;
-  const error = checkForError(titleField, authorField, pagesField);
-  if (!error) {
-    addBookToLibrary
-    (
+  // EVENT LISTENERS
+  modalBtn.addEventListener('click', _handleModalShow);
+  cancelBtn.addEventListener('click', _handleCancelClick);
+  formElement.addEventListener('submit', _handleFormSubmit);
+  document.body.addEventListener('click', _handleModalHide);
+
+  // EVENT HANDLERS
+  function _handleModalHide (e) {
+    if ([...e.target.classList].includes('modal')) {
+      _hideModal();
+    }
+  }
+
+  function _handleRemove(e) {
+    const book = e.target.parentElement.parentElement;
+    const bookId = Number(book.dataset.idx);
+    myLibrary.removeBook(bookId);
+    render();
+  }
+
+  function _handleToggle(e) {
+    const book = e.target.parentElement.parentElement;
+    const bookId = Number(book.dataset.idx);
+    const newStatus = myLibrary.changeReadStatus(bookId);
+    if (newStatus) {
+      book.classList.add('read');
+      book.classList.remove('unread');
+    } else {
+      book.classList.add('unread');
+      book.classList.remove('read');
+    }
+
+    render();
+  }
+
+  function _handleModalShow() {
+    modalElement.style.display = 'block'
+    _clearFields(titleField, authorField, pagesField);
+    titleField.focus();
+  }
+
+  function _handleCancelClick(e) {
+    e.preventDefault();
+    _hideModal();
+  }
+
+  function _handleFormSubmit(e) {
+    e.preventDefault();
+    const readStatus = ([...readOptions].reduce(_optionReducer)) === true;
+    const error = _checkForError(titleField, authorField, pagesField);
+    const [title, author, pages, status] = [
       titleField.value,
       authorField.value,
       Number(pagesField.value),
       readStatus
-    );
-    clearFields(titleField, authorField, pagesField);
+    ];
+
+    if (!error) {
+      myLibrary.addBook(title, author, pages, status);
+      _clearFields(titleField, authorField, pagesField);
+      modalElement.style.display = 'none';
+    }
+
+    render();
+  }
+
+  function _hideModal() {
     modalElement.style.display = 'none';
+    document.body.focus();
+    _clearFields(titleField, authorField, pagesField);
   }
 
-  render();
-}
+  function _optionReducer(a, b) {
+    if (a.checked) {
+      return true;
+    }
 
-// HELPER FUNCTIONS
-function storageAvailable(type) {
-  var storage;
-  try {
-    storage = window[type];
-    var x = '__storage_test__';
-    storage.setItem(x, x);
-    storage.removeItem(x);
-    return true;
-  }
-  catch(e) {
-    return e instanceof DOMException && (
-      // everything except Firefox
-      e.code === 22 ||
-      // Firefox
-      e.code === 1014 ||
-      // test name field too, because code might not be present
-      // everything except Firefox
-      e.name === 'QuotaExceededError' ||
-      // Firefox
-      e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
-      // acknowledge QuotaExceededError only if there's something already stored
-      (storage && storage.length !== 0);
-  }
-}
-
-function hideModal() {
-  modalElement.style.display = 'none';
-  document.body.focus();
-  clearFields(titleField, authorField, pagesField);
-}
-
-function removeBook(id) {
-  myLibrary.splice(id, 1);
-  saveLibraryToLocal();
-}
-
-function changeReadStatus(id) {
-  myLibrary[id].read = !myLibrary[id].read;
-  saveLibraryToLocal();
-  return myLibrary[id].read;
-}
-
-function optionReducer(a, b) {
-  if (a.checked) {
-    return true;
+    return false;
   }
 
-  return false;
-}
+  function _checkForError(...inputFields) {
+    let error = false;
 
-function checkForError(...inputFields) {
-  let error = false;
+    inputFields.forEach((field) => {
+      if (field.value === '') {
+        error = true;
+        field.nextElementSibling.style.opacity = '1';
+      } else {
+        field.nextElementSibling.style.opacity = '0';
+      }
+    });
 
-  inputFields.forEach((field) => {
-    if (field.value === '') {
-      error = true;
-      field.nextElementSibling.style.opacity = '1';
-    } else {
+    return error;
+  }
+
+  function _clearFields(...args) {
+    args.forEach((field) => {
+      field.value = '';
       field.nextElementSibling.style.opacity = '0';
-    }
-  });
-
-  return error;
-}
-
-function clearFields(...args) {
-  args.forEach((field) => {
-    field.value = '';
-    field.nextElementSibling.style.opacity = '0';
-  });
-}
-
-function saveLibraryToLocal() {
-  if (storageAvailable('localStorage')) {
-    localStorage.setItem('library', JSON.stringify(myLibrary));
+    });
   }
-}
 
-function getLibraryFromLocal() {
-  if (
-    storageAvailable('localStorage')
-    && localStorage.length !== 0
-    && localStorage.library
-  ) {
-    myLibrary = JSON.parse(localStorage.getItem('library'));
-  }
-}
+  function _createElement(tag, attribs, markup, text, events, ...children) {
+    const el = document.createElement(tag);
+    if (text)     el.textContent = text;
+    if (markup)   el.innerHTML = markup;
+    if (children) children.forEach((child) => el.appendChild(child));
 
-function addBookToLibrary(title, author, pages, read = false) {
-  const book = new Book(title, author, pages, read);
-  myLibrary.push(book);
-  if (storageAvailable('localStorage')) {
-    saveLibraryToLocal();
-  }
-}
-
-function render() {
-  const containerElement = document.querySelector('.flex-container');
-
-  [...containerElement.children].forEach((book) => {
-    containerElement.removeChild(book);
-  });
-
-  myLibrary.forEach((book, index) => {
-    const bookElement = document.createElement('div');
-
-    const titleElement = document.createElement('p');
-    titleElement.classList.add('book-title');
-    titleElement.innerHTML = '<span class="label">Title:</span> ';
-    titleElement.innerHTML += book.title;
-
-    const authorElement = document.createElement('p');
-    authorElement.classList.add('book-author');
-    authorElement.innerHTML = '<span class="label">Author:</span> ';
-    authorElement.innerHTML += book.author;
-
-    const pagesElement = document.createElement('p');
-    pagesElement.classList.add('book-pages');
-    pagesElement.innerHTML = '<span class="label">Pages:</span> '
-    pagesElement.innerHTML += book.pages;
-
-    const readElement = document.createElement('p');
-    readElement.classList.add('book-read-status');
-    readElement.innerHTML = '<span class="label">Read Status:</span> ';
-    if (book.read) {
-      readElement.innerHTML += 'yes';
-      bookElement.classList.add('read');
-    } else {
-      readElement.innerHTML += 'not yet';
-      bookElement.classList.add('unread');
+    if (attribs) {
+      if (attribs.id)        el.id = attribs.id;
+      if (attribs.classList) el.classList = attribs.classList.join(' ');
+      if (attribs.dataset)   Object.assign(el.dataset, attribs.dataset);
     }
 
-    const toggleReadBtn = document.createElement('button');
-    toggleReadBtn.addEventListener('click', handleToggle);
-    toggleReadBtn.classList.add('toggle');
-    toggleReadBtn.textContent = 'Change read status'
+    if (events) {
+      Object.keys(events).forEach((ev) => el.addEventListener(ev, events[ev]));
+    }
 
-    const removeBtn = document.createElement('button');
-    removeBtn.addEventListener('click', handleRemove);
-    removeBtn.classList.add('remove');
-    removeBtn.textContent = 'Remove';
+    return el;
+  }
 
-    const btnGroup = document.createElement('div');
-    btnGroup.classList.add('justify-space-between');
-    btnGroup.classList.add('flex-container');
-    btnGroup.appendChild(toggleReadBtn);
-    btnGroup.appendChild(removeBtn);
+  function render() {
+    const containerElement = document.querySelector('.flex-container');
 
-    bookElement.classList.add('book');
-    bookElement.appendChild(titleElement);
-    bookElement.appendChild(authorElement);
-    bookElement.appendChild(pagesElement);
-    bookElement.appendChild(readElement);
-    bookElement.appendChild(btnGroup);
-    bookElement.dataset.id = index;
-    containerElement.appendChild(bookElement);
-  });
-}
+    [...containerElement.children].forEach((book) => {
+      containerElement.removeChild(book);
+    });
+
+    myLibrary.bookList.forEach((book, idx) => {
+      const titleElement = _createElement(
+        'p',
+        {classList: ['book-title']},
+        `<span class="label">Title:</span> ${book.title}`
+      );
+
+      const authorElement = _createElement(
+        'p',
+        {classList: ['book-author']},
+        `<span class="label">Author:</span> ${book.title}`
+      );
+
+      const pagesElement = _createElement(
+        'p',
+        {classList: ['book-pages']},
+        `<span class="label">Pages:</span> ${book.pages}`
+      );
+
+      const readElement = _createElement(
+        'p',
+        {classList: ['book-read-status', (book.read ? 'read' : 'unread')]},
+        `<span class="label">Read Status:</span> ${book.read ? 'yes' : 'no yet'}`
+      );
+
+      const toggleReadBtn = _createElement(
+        'button',
+        {classList: ['toggle']},
+        null, 'Change read status',
+        {'click': _handleToggle}
+      );
+
+      const removeBtn = _createElement(
+        'button',
+        {classList: ['remove']},
+        null, 'Remove',
+        {'click': _handleRemove}
+      );
+
+      const btnGroup = _createElement(
+        'div',
+        {classList: ['justify-space-between', 'flex-container']},
+        null, null, null,
+        toggleReadBtn, removeBtn
+      );
+
+      const bookElement = _createElement(
+        'div',
+        {classList: ['book', (book.read ? 'read' : 'unread')], dataset: {idx}},
+        null, null, null,
+        titleElement, authorElement, pagesElement, readElement, btnGroup
+      );
+
+      containerElement.appendChild(bookElement);
+    });
+  }
+
+  return {render};
+})();
+
+// INIT
+const myLibrary = new Library();
+displayModule.render();
