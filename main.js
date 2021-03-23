@@ -98,6 +98,14 @@ const displayModule = (function() {
   modalBtn.addEventListener('click', _handleModalShow);
   cancelBtn.addEventListener('click', _handleCancelClick);
   formElement.addEventListener('submit', _handleFormSubmit);
+  pagesField.addEventListener('input', function () {
+    _showInvalidPagesFieldErrors(this);
+  });
+  [titleField, authorField].forEach((field) => {
+    field.addEventListener('input', function () {
+      _showMissingInputError(this);
+    });
+  });
   document.body.addEventListener('click', _handleModalHide);
 
   // EVENT HANDLERS
@@ -142,8 +150,15 @@ const displayModule = (function() {
 
   function _handleFormSubmit(e) {
     e.preventDefault();
+
     const readStatus = ([...readOptions].reduce(_optionReducer)) === true;
-    const error = _checkForError(titleField, authorField, pagesField);
+    const hasMissingValue = _showMissingValueErrors(titleField, authorField, pagesField);
+    const hasInvalidPagesField = _showInvalidPagesFieldErrors(pagesField);
+
+    if (hasMissingValue || hasInvalidPagesField) {
+      return;
+    }
+
     const [title, author, pages, status] = [
       titleField.value,
       authorField.value,
@@ -151,11 +166,9 @@ const displayModule = (function() {
       readStatus
     ];
 
-    if (!error) {
-      myLibrary.addBook(title, author, pages, status);
-      _clearFields(titleField, authorField, pagesField);
-      modalElement.style.display = 'none';
-    }
+    myLibrary.addBook(title, author, pages, status);
+    _clearFields(titleField, authorField, pagesField);
+    modalElement.style.display = 'none';
 
     render();
   }
@@ -174,25 +187,62 @@ const displayModule = (function() {
     return false;
   }
 
-  function _checkForError(...inputFields) {
-    let error = false;
+  function _showMissingInputError(field) {
+    const { valueMissing } = field.validity;
+
+    if (valueMissing) {
+      _showError(field);
+    } else {
+      _hideError(field);
+    }
+
+    return valueMissing;
+  }
+
+  function _showMissingValueErrors(...inputFields) {
+    let hasError = false;
 
     inputFields.forEach((field) => {
-      if (field.value === '') {
-        error = true;
-        field.nextElementSibling.style.opacity = '1';
-      } else {
-        field.nextElementSibling.style.opacity = '0';
-      }
+      hasError = _showMissingInputError(field) || hasError;
     });
 
-    return error;
+    return hasError;
+  }
+
+  function _showInvalidPagesFieldErrors(pagesField) {
+    const { badInput, rangeUnderflow, valid } = pagesField.validity;
+
+    if (valid) {
+      _hideError(pagesField);
+    } else {
+      if (badInput) {
+        _showError(pagesField, 'Please enter a valid number')
+      }
+
+      if (rangeUnderflow) {
+        _showError(pagesField, 'Number of pages cannot be less than 1')
+      }
+    }
+
+    return !valid;
+  }
+
+  function _showError(inputField, msg) {
+    const errorElm = inputField.nextElementSibling;
+    errorElm.textContent = msg || errorElm.textContent;
+    errorElm.classList.add('visible');
+  }
+
+  function _hideError(inputField, msg) {
+    const errorElm = inputField.nextElementSibling;
+    errorElm.textContent = msg || errorElm.textContent;
+    errorElm.classList.remove('visible');
   }
 
   function _clearFields(...args) {
     args.forEach((field) => {
       field.value = '';
-      field.nextElementSibling.style.opacity = '0';
+      _hideError(field)
     });
   }
 
@@ -244,7 +294,7 @@ const displayModule = (function() {
       const readElement = _createElement(
         'p',
         {classList: ['book-read-status', (book.read ? 'read' : 'unread')]},
-        `<span class="label">Read Status:</span> ${book.read ? 'yes' : 'no yet'}`
+        `<span class="label">Read Status:</span> ${book.read ? 'Yes' : 'No'}`
       );
 
       const toggleReadBtn = _createElement(
